@@ -9,12 +9,12 @@ CREATE TABLE Facilities(
 	name TEXT not NULL
 );
 
-CREATE TABLE Types(
+CREATE TABLE EntertainmentsTypes(
 	id_type SERIAL PRIMARY KEY, 
 	name TEXT UNIQUE
 );
 
-CREATE TABLE Characteristics(
+CREATE TABLE ReviewsCharacteristics(
 	id_characteristic SERIAL PRIMARY KEY, 
 	name TEXT not NULL
 );
@@ -34,12 +34,12 @@ CREATE TABLE Accomodations(
 	id_accomodation SERIAL PRIMARY KEY, 
 	user_id INT references People, 
 	country_id INT references Countries, 
-	address TEXT, 
-	gps TEXT, 
+	address TEXT UNIQUE, 
+	gps TEXT UNIQUE, 
 	description TEXT, 
-	rooms_amount INT, 
-	beds_amount INT, 
-	max_residents INT, 
+	rooms_amount INT CHECK (rooms_amount >= 1), 
+	beds_amount INT CHECK (beds_amount >= 0), 
+	max_residents INT CHECK (max_residents >= 1), 
 	clening_cost INT
 );
 
@@ -61,7 +61,7 @@ CREATE TABLE ReviewsAccomodation(
 
 CREATE TABLE AccCharacteristics(
 	id_acc_characteristic SERIAL PRIMARY KEY, 
-	characteristic_id INT references Characteristics, 
+	characteristic_id INT references ReviewsCharacteristics, 
 	review_id INT references ReviewsAccomodation, 
 	mark INT not NULL CHECK(mark <= 5 AND mark >= 1), 
 	comment TEXT,
@@ -88,7 +88,7 @@ CREATE TABLE Entertainments(
 	gps TEXT, 
 	start DATE, 
 	finish DATE, 
-	type_id INT references Types, 
+	type_id INT references EntertainmentsTypes, 
 	description TEXT
 );
 
