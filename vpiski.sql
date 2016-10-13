@@ -46,7 +46,8 @@ CREATE TABLE Accomodations(
 CREATE TABLE WeeklyCost(
 	accomodation_id INT references Accomodations, 
 	week_number INT not NULL, 
-	price INT
+	price INT,
+	PRIMARY KEY (accomodation_id, week_number)
 );
 
 CREATE TABLE ReviewsAccomodation(
@@ -63,7 +64,8 @@ CREATE TABLE AccCharacteristics(
 	characteristic_id INT references Characteristics, 
 	review_id INT references ReviewsAccomodation, 
 	mark INT not NULL CHECK(mark <= 5 AND mark >= 1), 
-	comment TEXT
+	comment TEXT,
+	UNIQUE(characteristic_id, review_id)
 );
 
 CREATE TABLE AccFacilities(
@@ -74,7 +76,6 @@ CREATE TABLE AccFacilities(
 
 CREATE TABLE ReviewsResident(
 	id_review SERIAL PRIMARY KEY, 
-	accomodation_id INT references Accomodations, 
 	author_id INT references People, 
 	renter_id INT references People, 
 	review TEXT, 
