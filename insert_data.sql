@@ -32,6 +32,7 @@ INSERT INTO Facilities VALUES (5, 'Kitchen');
 INSERT INTO Facilities VALUES (6, 'Elevator');
 INSERT INTO Facilities VALUES (7, 'Wireless internet');
 INSERT INTO Facilities VALUES (8, 'Air conditioning');
+INSERT INTO Facilities VALUES (9, 'Wi-Fi');
 
 --Fill People table
 INSERT INTO People VALUES (1, 'Maria', 'Ivanova', 'mashka_11@mail.ru', '123-45-67', 'F', '1995-10-29');
@@ -49,6 +50,10 @@ INSERT INTO People VALUES (10, 'Peter', 'King', 'pancakes.forever@gmail.com', '9
 INSERT INTO Accomodations VALUES (1, 1, 1, 'SPb, 197823, Gagarina str., 30-124', '55,755831; 67,617673', 'Smal but very cosy flat with a beautiful view', 1, 1, 2, 500); -- A Maria's flat in Russia
 INSERT INTO Accomodations VALUES (2, 10, 7, 'Barcelona, d/en Boquer, 6', '41,174900; 02,044200', 'Very nice appartment', 1, 2, 4, 750); -- A Peter's flat in Spain
 INSERT INTO Accomodations VALUES (3, 6, 2, 'London, Oxford street, 2', NULL, 'Luxury modern flat', 3, 4, 4, 1500);
+INSERT INTO Accomodations VALUES (4, 10, 7, 'Barcelona', NULL, 'The second', 2, 5, 7, 10); --A Peter's flat in Spain
+INSERT INTO Accomodations VALUES (5, 10, 7, 'Barcelona, in the center', NULL, 'The third', 2, 6, 6, 1000); --A Peter's flat in Spain
+INSERT INTO Accomodations VALUES (6, 10, 7, 'Barcelona, in the outskirts', NULL, 'The forth', 3, 6, 10, 2000); --A Peter's flat in Spain
+INSERT INTO Accomodations VALUES (7, 1, 1, 'SPb, 197823, Gagarina str., 31-124', '55,755832; 67,617673', 'Smalll but very cosy flat with a beautiful view', 1, 1, 2, 500); -- A Maria's flat in Russia
 
 --Fill WeeklyCost table
 INSERT INTO WeeklyCost VALUES (1, 1, 2500);
@@ -58,6 +63,11 @@ INSERT INTO WeeklyCost VALUES (1, 25, 3000);
 INSERT INTO WeeklyCost VALUES (2, 1, 3000);
 INSERT INTO WeeklyCost VALUES (3, 1, 12000);
 INSERT INTO WeeklyCost VALUES (3, 25, 15000);
+INSERT INTO WeeklyCost VALUES (4, 1, 2000);
+INSERT INTO WeeklyCost VALUES (5, 2, 2400);
+INSERT INTO WeeklyCost VALUES (5, 4, 4000);
+INSERT INTO WeeklyCost VALUES (6, 1, 3000);
+INSERT INTO WeeklyCost VALUES (7, 1, 25000);
 
 --Fill AccFacilities table
 INSERT INTO AccFacilities VALUES (1, 1, 1);
@@ -75,6 +85,11 @@ INSERT INTO AccFacilities VALUES (12, 2, 6);
 INSERT INTO AccFacilities VALUES (13, 3, 1);
 INSERT INTO AccFacilities VALUES (14, 3, 4);
 INSERT INTO AccFacilities VALUES (15, 3, 8);
+INSERT INTO AccFacilities VALUES (16, 6, 8);
+INSERT INTO AccFacilities VALUES (17, 5, 8);
+INSERT INTO AccFacilities VALUES (18, 6, 1);
+INSERT INTO AccFacilities VALUES (19, 5, 9);
+INSERT INTO AccFacilities VALUES (20, 4, 9);
 
 --Fill Entertainments table
 
