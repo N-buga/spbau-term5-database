@@ -102,5 +102,7 @@ INSERT INTO Application VALUES (7, 8, 1, '2016-11-27', '2016-11-30', 'Nice flat!
 INSERT INTO Application VALUES (8, 9, 1, '2016-12-27', '2017-01-19', '', FALSE);
 INSERT INTO Application VALUES (9, 10, 1, '2017-03-01', '2017-04-09', 'I hope it is not only rains in St-Petersburg in spring', TRUE);
 INSERT INTO Application VALUES (10, 1, 2, '2017-06-20', '2017-07-09', 'Run away from rains', TRUE);
+INSERT INTO Application VALUES (11, 10, 1, '2017-01-01', '2017-04-09', 'I hope it is not only rains in St-Petersburg in spring', TRUE);
+INSERT INTO Application VALUES (12, 1, 2, '2017-01-02', '2017-02-20', 'Run away from rains', TRUE);
 
 
