@@ -91,6 +91,16 @@ INSERT INTO AccFacilities VALUES (18, 6, 1);
 INSERT INTO AccFacilities VALUES (19, 5, 9);
 INSERT INTO AccFacilities VALUES (20, 4, 9);
 
---Fill Entertainments table
+--Fill Application table
+INSERT INTO Application VALUES (1, 2, 1, '2016-10-27', '2016-11-09', 'Hello! I think your flat is cool!', TRUE);
+INSERT INTO Application VALUES (2, 3, 1, '2016-11-04', '2016-11-14', 'Hi! I want to book your appartment.', FALSE);
+INSERT INTO Application VALUES (3, 4, 1, '2017-01-01', '2017-02-01', 'Happy New Year!', TRUE);
+INSERT INTO Application VALUES (4, 5, 1, '2016-12-01', '2016-12-04', 'I want to spend my holidays in Saint-Petersburg', TRUE);
+INSERT INTO Application VALUES (5, 6, 1, '2016-12-15', '2016-12-28', 'Beautiful winter S-Petersburg', TRUE);
+INSERT INTO Application VALUES (6, 7, 1, '2016-12-10', '2016-12-20', '', FALSE);
+INSERT INTO Application VALUES (7, 8, 1, '2016-11-27', '2016-11-30', 'Nice flat!', TRUE);
+INSERT INTO Application VALUES (8, 9, 1, '2016-12-27', '2017-01-19', '', FALSE);
+INSERT INTO Application VALUES (9, 10, 1, '2017-03-01', '2017-04-09', 'I hope it is not only rains in St-Petersburg in spring', TRUE);
+INSERT INTO Application VALUES (10, 1, 2, '2017-06-20', '2017-07-09', 'Run away from rains', TRUE);
 
 
