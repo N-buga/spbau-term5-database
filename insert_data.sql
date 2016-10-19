@@ -105,4 +105,15 @@ INSERT INTO Application VALUES (10, 1, 2, '2017-06-20', '2017-07-09', 'Run away 
 INSERT INTO Application VALUES (11, 10, 1, '2017-01-01', '2017-04-09', 'I hope it is not only rains in St-Petersburg in spring', TRUE);
 INSERT INTO Application VALUES (12, 1, 2, '2017-01-02', '2017-02-20', 'Run away from rains', TRUE);
 
+--Fill ReviewsAccomodation table
+INSERT INTO ReviewsAccomodation VALUES (1, 1, 'review1', 1, timestamp '2017-06-20 00:00:00');
+INSERT INTO ReviewsAccomodation VALUES (2, 1, 'review2', 1, timestamp '2017-06-20 00:00:00');
+INSERT INTO ReviewsAccomodation VALUES (3, 2, 'review3', 1, timestamp '2017-06-20 00:00:00');
+INSERT INTO ReviewsAccomodation VALUES (4, 1, 'review4', 1, timestamp '2017-06-20 00:00:00');
+
+--Fill AccCharacteristics table
+INSERT INTO AccCharacteristics VALUES (1,1,1,4,'comment');
+INSERT INTO AccCharacteristics VALUES (2,2,1,5,'comment');
+INSERT INTO AccCharacteristics VALUES (3,1,2,3,'comment');
+INSERT INTO AccCharacteristics VALUES (4,1,3,1,'comment');
 
