@@ -69,14 +69,18 @@ AND
     A.is_accepted = TRUE
 GROUP BY A.id, C.id, Ac.id;
 
-
-
 --5.
-SELECT A.id, AVG(C.mark)
-FROM Accomodations as A
-JOIN ReviewsAccomodation as R ON A.id = R.accomodation_id
-JOIN AccCharacteristics as C ON R.id = C.review_id
-GROUP BY (A.id);
+WITH AR AS (
+    SELECT A.id as a_id, R.id as r_id
+    FROM Accomodations as A
+    JOIN ReviewsAccomodation as R ON A.id = R.accomodation_id
+    GROUP BY A.id, R.id
+)
+SELECT AR.a_id, AVG(C.mark)
+FROM
+AR
+JOIN AccCharacteristics as C ON AR.r_id = C.review_id
+GROUP BY AR.a_id;
 
 --6.
 SELECT C.name, COUNT(*)
