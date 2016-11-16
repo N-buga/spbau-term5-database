@@ -33,18 +33,21 @@ JOIN Hosts as h ON h.host_id = p.id
 JOIN Renters as r ON r.renter_id = p.id;
 
 --3.
-CREATE OR REPLACE VIEW BookingStat AS
-    SELECT COUNT(app.user_id) as bookings_amount, app.accomodation_id as acc_id FROM Application as app
+WITH BookingStat AS (
+    SELECT COUNT(app.user_id) as bookings_amount, app.accomodation_id as acc_id
+    FROM Application as app
     WHERE app.is_accepted = TRUE
-    GROUP BY acc_id;
-
-CREATE OR REPLACE VIEW PopularAcc AS
+    GROUP BY acc_id
+), PopularAcc AS (
     SELECT bs.acc_id FROM BookingStat as bs
-    WHERE bs.bookings_amount >= 10;
+    WHERE bs.bookings_amount >= 10
+)
 
 SELECT p.name, p.second_name FROM People as p
+EXCEPT
+SELECT p.name, p.second_name FROM People as p
 JOIN Accomodations as acc ON p.id = acc.user_id
-WHERE acc.id NOT IN (SELECT acc_id FROM PopularAcc);
+WHERE acc.id IN (SELECT acc_id FROM PopularAcc);
 
 --4.
 SELECT P.e_mail, MIN(A.sum), MAX(A.sum)
