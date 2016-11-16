@@ -11,7 +11,6 @@ JOIN WeeklyCost WC ON A.id = WC.accomodation_id
 JOIN Countries C ON A.country_id = C.id
 WHERE WC.week_number = 1 AND A.max_residents >=6 AND C.name = 'Spain';
 
-prepare plan1 as 
 SELECT * FROM Country_week_resid_acc
 EXCEPT
 SELECT CWRA.*
