@@ -110,13 +110,14 @@ CREATE AGGREGATE median(NUMERIC) (
 );
 
 CREATE OR REPLACE VIEW Median_country_week AS
-
 SELECT C.id, C.name, WC.week_number,  MEDIAN(COALESCE(C.commission, 0) +  7*COALESCE(WC.price, 0) + COALESCE(A.clening_cost, 0)) as median_cost
 FROM Accomodations A
 JOIN Countries C ON A.country_id = C.id
 JOIN WeeklyCost WC ON WC.accomodation_id = A.id
 GROUP BY C.id, WC.week_number
 ORDER BY C.id;
+
+SELECT * FROM Median_country_week;
 
 --8. 
 SELECT id, week_number 
