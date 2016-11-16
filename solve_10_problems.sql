@@ -46,46 +46,19 @@ SELECT p.name, p.second_name FROM People as p
 JOIN Accomodations as acc ON p.id = acc.user_id
 WHERE acc.id NOT IN (SELECT acc_id FROM PopularAcc);
 
---4. 
-SELECT A.id, COALESCE (C.commission, 0)
-+ 7 * sum (COALESCE (WC.price, 0))
-+ COALESCE (Ac.clening_cost, 0)
-- (EXTRACT(ISODOW FROM DATE(A.start_date)) - 1)* COALESCE ((SELECT wc.price FROM WeeklyCost as WC
-    JOIN Accomodations as Ac ON Ac.id = WC.accomodation_id
-    JOIN Application as A ON Ac.id = A.accomodation_id
-    WHERE A.is_accepted = TRUE
-    AND WC.week_number = EXTRACT(WEEK FROM DATE(A.start_date))), 0)
--(7 - EXTRACT(ISODOW FROM DATE(A.end_date)))* COALESCE ((SELECT wc.price FROM WeeklyCost as WC
-    JOIN Accomodations as Ac ON Ac.id = WC.accomodation_id
-    JOIN Application as A ON Ac.id = A.accomodation_id
-    WHERE A.is_accepted = TRUE
-    AND WC.week_number = EXTRACT(WEEK FROM DATE(A.end_date))), 0)
-as cost FROM People P
+--4.
+SELECT P.e_mail, MIN(A.sum), MAX(A.sum)
+FROM People as P
 JOIN Application A ON P.id = A.user_id
-JOIN WeeklyCost WC ON A.accomodation_id = WC.accomodation_id
-JOIN Accomodations Ac ON Ac.id = A.accomodation_id
-JOIN Countries C ON C.id = Ac.country_id
-WHERE (CASE EXTRACT(WEEK FROM DATE(A.start_date)) - EXTRACT(WEEK FROM DATE(A.end_date)) <= 0
-WHEN TRUE THEN
-    WC.week_number BETWEEN EXTRACT(WEEK FROM DATE(A.start_date)) AND EXTRACT(WEEK FROM DATE(A.end_date))
-ELSE
-    WC.week_number <= EXTRACT(WEEK FROM DATE(A.end_date)) OR WC.week_number >= EXTRACT(WEEK FROM DATE(A.start_date)) END)
-AND
-    A.is_accepted = TRUE
-GROUP BY A.id, C.id, Ac.id;
+WHERE A.is_accepted = TRUE
+GROUP BY P.id;
 
 --5.
-WITH AR AS (
-    SELECT A.id as a_id, R.id as r_id
-    FROM Accomodations as A
-    JOIN ReviewsAccomodation as R ON A.id = R.accomodation_id
-    GROUP BY A.id, R.id
-)
-SELECT AR.a_id, AVG(C.mark)
-FROM
-AR
-JOIN AccCharacteristics as C ON AR.r_id = C.review_id
-GROUP BY AR.a_id;
+SELECT A.id, AVG(C.mark)
+FROM Accomodations as A
+JOIN ReviewsAccomodation as R ON A.id = R.accomodation_id
+JOIN AccCharacteristics as C ON R.id = C.review_id
+GROUP BY A.id;
 
 --6.
 SELECT C.name, COUNT(*)
@@ -95,34 +68,44 @@ GROUP BY C.id;
 
 --7. 
 
-SELECT id_country, name, week_number, AVG(median_cost) as median_cost FROM
-	(SELECT C.id as id_country, C.name, WC.week_number,  COALESCE(C.commission, 0) +  7*COALESCE(WC.price, 0) + COALESCE(A.clening_cost, 0) as 		median_cost, COUNT(*) OVER w as cnt, ROW_NUMBER() OVER w as rowN
-	FROM Accomodations A
-	JOIN Countries C ON A.country_id = C.id
-	JOIN WeeklyCost WC ON WC.accomodation_id = A.id
-	WINDOW w AS (PARTITION BY C.id, WC.week_number)) Q
-WHERE cnt + 1 BETWEEN 2*rowN - 1 AND 2*rowN + 1
-GROUP BY week_number, id_country, name
-ORDER BY id_country, week_number;
+CREATE OR REPLACE FUNCTION _final_median(NUMERIC[])
+   RETURNS NUMERIC AS
+$$
+   SELECT AVG(val)
+   FROM (
+     SELECT val
+     FROM unnest($1) val
+     ORDER BY 1
+     LIMIT  2 - MOD(array_upper($1, 1), 2)
+     OFFSET CEIL(array_upper($1, 1) / 2.0) - 1
+   ) sub;
+$$
+LANGUAGE 'sql' IMMUTABLE;
+
+DROP AGGREGATE IF EXISTS median(NUMERIC) CASCADE;
+
+CREATE AGGREGATE median(NUMERIC) (
+  SFUNC=array_append,
+  STYPE=NUMERIC[],
+  FINALFUNC=_final_median,
+  INITCOND='{}'
+);
+
+CREATE OR REPLACE VIEW Median_country_week AS
+SELECT C.id, C.name, WC.week_number,  MEDIAN(COALESCE(C.commission, 0) +  7*COALESCE(WC.price, 0) + COALESCE(A.clening_cost, 0)) as median_cost
+FROM Accomodations A
+JOIN Countries C ON A.country_id = C.id
+JOIN WeeklyCost WC ON WC.accomodation_id = A.id
+GROUP BY C.id, WC.week_number
+ORDER BY C.id;
+
+SELECT * FROM Median_country_week;
 
 --8. 
-
-WITH Median_country_week 
-AS
-(SELECT id_country, name, week_number, AVG(median_cost) as median_cost FROM
-	(SELECT C.id as id_country, C.name, WC.week_number,  COALESCE(C.commission, 0) +  7*COALESCE(WC.price, 0) + COALESCE(A.clening_cost, 0) as 		median_cost, COUNT(*) OVER w as cnt, ROW_NUMBER() OVER w as rowN
-	FROM Accomodations A
-	JOIN Countries C ON A.country_id = C.id
-	JOIN WeeklyCost WC ON WC.accomodation_id = A.id
-	WINDOW w AS (PARTITION BY C.id, WC.week_number)) Q
-WHERE cnt + 1 BETWEEN 2*rowN - 1 AND 2*rowN + 1
-GROUP BY week_number, id_country, name
-ORDER BY id_country, week_number)
-
-SELECT id_country, week_number 
+SELECT id, week_number 
 FROM
-(SELECT id_country, week_number, median_cost, 
-MAX(median_cost) OVER(PARTITION BY id_country) as max_m_cost
+(SELECT id, week_number, median_cost, 
+MAX(median_cost) OVER(PARTITION BY id) as max_m_cost
 FROM Median_country_week) AS With_max
 WHERE 2*median_cost < max_m_cost;
 
