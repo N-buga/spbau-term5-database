@@ -86,43 +86,34 @@ GROUP BY C.id;
 
 --7. 
 
-CREATE OR REPLACE FUNCTION _final_median(NUMERIC[])
-   RETURNS NUMERIC AS
-$$
-   SELECT AVG(val)
-   FROM (
-     SELECT val
-     FROM unnest($1) val
-     ORDER BY 1
-     LIMIT  2 - MOD(array_upper($1, 1), 2)
-     OFFSET CEIL(array_upper($1, 1) / 2.0) - 1
-   ) sub;
-$$
-LANGUAGE 'sql' IMMUTABLE;
-
-DROP AGGREGATE IF EXISTS median(NUMERIC) CASCADE;
-
-CREATE AGGREGATE median(NUMERIC) (
-  SFUNC=array_append,
-  STYPE=NUMERIC[],
-  FINALFUNC=_final_median,
-  INITCOND='{}'
-);
-
-CREATE OR REPLACE VIEW Median_country_week AS
-
-SELECT C.id, C.name, WC.week_number,  MEDIAN(COALESCE(C.commission, 0) +  7*COALESCE(WC.price, 0) + COALESCE(A.clening_cost, 0)) as median_cost
-FROM Accomodations A
-JOIN Countries C ON A.country_id = C.id
-JOIN WeeklyCost WC ON WC.accomodation_id = A.id
-GROUP BY C.id, WC.week_number
-ORDER BY C.id;
+SELECT id_country, name, week_number, AVG(median_cost) as median_cost FROM
+	(SELECT C.id as id_country, C.name, WC.week_number,  COALESCE(C.commission, 0) +  7*COALESCE(WC.price, 0) + COALESCE(A.clening_cost, 0) as 		median_cost, COUNT(*) OVER w as cnt, ROW_NUMBER() OVER w as rowN
+	FROM Accomodations A
+	JOIN Countries C ON A.country_id = C.id
+	JOIN WeeklyCost WC ON WC.accomodation_id = A.id
+	WINDOW w AS (PARTITION BY C.id, WC.week_number)) Q
+WHERE cnt + 1 BETWEEN 2*rowN - 1 AND 2*rowN + 1
+GROUP BY week_number, id_country, name
+ORDER BY id_country, week_number;
 
 --8. 
-SELECT id, week_number 
+
+WITH Median_country_week 
+AS
+(SELECT id_country, name, week_number, AVG(median_cost) as median_cost FROM
+	(SELECT C.id as id_country, C.name, WC.week_number,  COALESCE(C.commission, 0) +  7*COALESCE(WC.price, 0) + COALESCE(A.clening_cost, 0) as 		median_cost, COUNT(*) OVER w as cnt, ROW_NUMBER() OVER w as rowN
+	FROM Accomodations A
+	JOIN Countries C ON A.country_id = C.id
+	JOIN WeeklyCost WC ON WC.accomodation_id = A.id
+	WINDOW w AS (PARTITION BY C.id, WC.week_number)) Q
+WHERE cnt + 1 BETWEEN 2*rowN - 1 AND 2*rowN + 1
+GROUP BY week_number, id_country, name
+ORDER BY id_country, week_number)
+
+SELECT id_country, week_number 
 FROM
-(SELECT id, week_number, median_cost, 
-MAX(median_cost) OVER(PARTITION BY id) as max_m_cost
+(SELECT id_country, week_number, median_cost, 
+MAX(median_cost) OVER(PARTITION BY id_country) as max_m_cost
 FROM Median_country_week) AS With_max
 WHERE 2*median_cost < max_m_cost;
 
