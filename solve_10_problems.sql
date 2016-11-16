@@ -69,8 +69,6 @@ AND
     A.is_accepted = TRUE
 GROUP BY A.id, C.id, Ac.id;
 
-CREATE VIEW blabla AS
-
 
 
 --5.
@@ -101,7 +99,9 @@ $$
    ) sub;
 $$
 LANGUAGE 'sql' IMMUTABLE;
- 
+
+DROP AGGREGATE IF EXISTS median(NUMERIC) CASCADE;
+
 CREATE AGGREGATE median(NUMERIC) (
   SFUNC=array_append,
   STYPE=NUMERIC[],
@@ -119,10 +119,10 @@ GROUP BY C.id, WC.week_number
 ORDER BY C.id;
 
 --8. 
-SELECT id_country, week_number 
+SELECT id, week_number 
 FROM
-(SELECT id_country, week_number, median_cost, 
-MAX(median_cost) OVER(PARTITION BY id_country) as max_m_cost
+(SELECT id, week_number, median_cost, 
+MAX(median_cost) OVER(PARTITION BY id) as max_m_cost
 FROM Median_country_week) AS With_max
 WHERE 2*median_cost < max_m_cost;
 

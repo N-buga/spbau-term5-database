@@ -56,7 +56,6 @@ CREATE TABLE ReviewsAccomodation(
 	review VARCHAR(255), 
 	user_id INT references People, 
 	reviewed_at TIMESTAMP not NULL
-
 );
 
 CREATE TABLE AccCharacteristics(
