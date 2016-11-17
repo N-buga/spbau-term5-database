@@ -3,29 +3,29 @@ CREATE INDEX on WeeklyCost(week_number);
 CREATE INDEX on Accomodations(max_residents);
 CREATE INDEX on Countries(name);
 
-CREATE OR REPLACE VIEW Country_week_resid_acc
-AS
-SELECT A.*
-FROM Accomodations A 
-JOIN WeeklyCost WC ON A.id = WC.accomodation_id
-JOIN Countries C ON A.country_id = C.id
-WHERE WC.week_number = 1 AND A.max_residents >=6 AND C.name = 'Spain';
+WITH CountryWeekResidentAcc AS (
+    SELECT A.*
+    FROM Accomodations A 
+    JOIN WeeklyCost WC ON A.id = WC.accomodation_id
+    JOIN Countries C ON A.country_id = C.id
+    WHERE WC.week_number = 1 AND A.max_residents >=6 AND C.name = 'Spain'
+)
 
-SELECT * FROM Country_week_resid_acc
+SELECT * FROM CountryWeekResidentAcc
 EXCEPT
 SELECT CWRA.*
-FROM Country_week_resid_acc CWRA 
+FROM CountryWeekResidentAcc CWRA 
 JOIN AccFacilities AF ON CWRA.id = AF.accomodation_id
 JOIN Facilities F ON F.id = AF.facility_id
 WHERE F.name = 'Wi-Fi';
 
 --2.
-CREATE OR REPLACE VIEW Hosts AS
-    SELECT DISTINCT acc.user_id as host_id FROM Accomodations as acc;
-
-CREATE OR REPLACE VIEW Renters AS
+WITH Hosts AS (
+    SELECT DISTINCT acc.user_id as host_id FROM Accomodations as acc
+), Renters AS (
     SELECT DISTINCT app.user_id as renter_id FROM Application as app
     WHERE app.is_accepted = TRUE;
+)
 
 SELECT p.name, p.second_name from People as p
 JOIN Hosts as h ON h.host_id = p.id
@@ -102,16 +102,19 @@ FROM Median_country_week) AS With_max
 WHERE 2*median_cost < max_m_cost;
 
 --9.
-CREATE OR REPLACE VIEW TotalCommission AS
+WITH TotalCommission AS (
     SELECT DISTINCT SUM(c.commission), c.name as country FROM Accomodations as acc
     JOIN Application as app ON acc.id = app.accomodation_id
     JOIN Countries as c ON c.id = acc.country_id
     WHERE app.is_accepted = TRUE
-    GROUP BY country;
+    GROUP BY country
+), TotalSum AS (
+    SELECT commission, SUM(commission) over() as summary, country FROM TotalCommission
+)
 
-SELECT TotalCommission.country as country_name, 
-   TotalCommission.sum as summary_commission, 
-   ROUND (100 * sum / SUM(sum) over()) as percentage FROM TotalCommission;
+SELECT TS.country as country_name, 
+   TS.commission as summary_commission, 
+   ROUND (100 * TS.commission / TS.summary) as percentage FROM TotalSum TS;
 
 --10.
 CREATE OR REPLACE VIEW TotalCommission AS
