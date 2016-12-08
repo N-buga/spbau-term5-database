@@ -1,9 +1,0 @@
-UPDATE Countries SET commission = 400 WHERE id_country = 1;
-UPDATE Countries SET commission = 900 WHERE id_country = 2;
-UPDATE Countries SET commission = 600 WHERE id_country = 3;
-UPDATE Countries SET commission = 100 WHERE id_country = 4;
-UPDATE Countries SET commission = 400 WHERE id_country = 5;
-UPDATE Countries SET commission = 500 WHERE id_country = 6;
-UPDATE Countries SET commission = 200 WHERE id_country = 7;
-UPDATE Countries SET commission = 400 WHERE id_country = 8;
-UPDATE Countries SET commission = 1000 WHERE id_country = 9;
