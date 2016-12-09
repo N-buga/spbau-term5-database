@@ -8,14 +8,20 @@ import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.misc.TransactionManager;
+import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.support.DatabaseConnection;
 import spark.Request;
 import spark.Response;
 import spark.Route;
 
+import javax.persistence.ColumnResult;
+import javax.persistence.EntityResult;
+import javax.persistence.FieldResult;
+import javax.persistence.SqlResultSetMapping;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
@@ -25,7 +31,7 @@ import static spark.Spark.port;
 public class WebApp {
   static JdbcConnectionSource createConnectionSource() {
     try {
-      JdbcConnectionSource connectionSource = new JdbcConnectionSource("jdbc:postgresql://localhost:5432/postgres?user=postgres&password=postgres");
+      JdbcConnectionSource connectionSource = new JdbcConnectionSource("jdbc:postgresql://localhost:5432/postgres?user=anta&password=7578757");
       connectionSource.getReadWriteConnection(null).setAutoCommit(false);
       return connectionSource;
     } catch (SQLException e) {
@@ -56,27 +62,49 @@ public class WebApp {
     final JdbcConnectionSource connectionSource = createConnectionSource();
     resp.type("text/plain");
     return runTxn("REPEATABLE READ", connectionSource, () -> {
-      List<String> spacecrafts = DaoManager.createDao(connectionSource, Accomodations.class)
-          .queryForAll().stream()
-          .map(s -> s.toString()).collect(Collectors.toList());
-      return String.join("\n", spacecrafts);
+      Dao<Accomodations, ?> accDao = DaoManager.createDao(connectionSource, Accomodations.class);
+      Dao<Countries, ?> countryDao = DaoManager.createDao(connectionSource, Countries.class);
+      QueryBuilder<Accomodations, ?> accQB = accDao.queryBuilder();
+      QueryBuilder<Countries, ?> countryQB = countryDao.queryBuilder();
+      accQB.join(countryQB);
+        List<String> accomodations = accQB.query().stream().map(Accomodations::toString).collect(Collectors.toList());
+        return String.join("\n", accomodations);
+    });
+  }
+
+  private static Object getAllCountries(Request req, Response resp) throws IOException, SQLException {
+    final JdbcConnectionSource connectionSource = createConnectionSource();
+    resp.type("text/plain");
+    return runTxn("REPEATABLE READ", connectionSource, () -> {
+      List<String> countries = DaoManager.createDao(connectionSource, Countries.class)
+              .queryForAll().stream()
+              .map(s -> s.toString()).collect(Collectors.toList());
+      return String.join("\n", countries);
     });
   }
 
   private static Object newAccomodations(Request req, Response resp) throws IOException, SQLException {
     final JdbcConnectionSource connectionSource = createConnectionSource();
     Object success = runTxn("READ COMMITTED", connectionSource, () -> {
-      Dao<Accomodations, Integer> spacecraftDao = DaoManager.createDao(connectionSource, Accomodations.class);
+        Countries country;
+        Dao<Countries, ?> countryDao = DaoManager.createDao(connectionSource, Countries.class);
+        List<Countries> list = countryDao.queryForEq("name", req.queryMap("country").value());
+        if (list.size() == 0) {
+            resp.status(418);
+            return String.format("Wrong country name '%s'!", req.queryMap("country").value());
+        }
+        country = list.get(0);
+        Dao<Accomodations, Integer> spacecraftDao = DaoManager.createDao(connectionSource, Accomodations.class);
       Accomodations newAccomodations = new Accomodations(
-              req.queryMap("user_id").integerValue(),
-              req.queryMap("country_id").integerValue(),
-              req.queryMap("address").value(),
-              req.queryMap("gps").value(),
-              req.queryMap("description").value(),
-              req.queryMap("rooms_amount").integerValue(),
-              req.queryMap("beds_amounts").integerValue(),
-              req.queryMap("max_residents").integerValue(),
-              req.queryMap("cleaning_cost").integerValue());
+              null,
+              null,
+              null,
+              req.queryMap("name").value(),
+              req.queryMap("rooms").integerValue(),
+              req.queryMap("beds").integerValue(),
+              req.queryMap("guests").integerValue(),
+              null,
+              country);
       spacecraftDao.create(newAccomodations);
       return true;
     });
@@ -91,6 +119,7 @@ public class WebApp {
   public static void main(String[] args) {
     port(8000);
     get("/apartment/all", WebApp.withTry(WebApp::getAllAccomodations));
+    get("/countries/all", WebApp.withTry(WebApp::getAllCountries));
     get("/apartment/new", WebApp.withTry(WebApp::newAccomodations));
   }
 
