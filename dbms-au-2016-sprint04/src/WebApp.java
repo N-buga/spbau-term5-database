@@ -6,6 +6,7 @@
 
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
+import com.j256.ormlite.dao.GenericRawResults;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.misc.TransactionManager;
 import com.j256.ormlite.stmt.QueryBuilder;
@@ -83,6 +84,49 @@ public class WebApp {
     });
   }
 
+    private static Object getAllReviewsAcc(Request req, Response resp) throws IOException, SQLException {
+        final JdbcConnectionSource connectionSource = createConnectionSource();
+        resp.type("text/plain");
+        return runTxn("REPEATABLE READ", connectionSource, () -> {
+            /*Dao<Accomodations, ?> accDao = DaoManager.createDao(connectionSource, Accomodations.class);
+            Dao<Countries, ?> countryDao = DaoManager.createDao(connectionSource, Countries.class);
+            Dao<ReviewsAccomodation, ?> reviewsAccDao = DaoManager
+                    .createDao(connectionSource, ReviewsAccomodation.class);
+            Dao<AccCharacteristics, ?> accCharacteristicsDao = DaoManager
+                    .createDao(connectionSource, AccCharacteristics.class);
+            Dao<ReviewsCharacteristics, ?> reviewsCharacteristicsDao = DaoManager
+                    .createDao(connectionSource, ReviewsCharacteristics.class);
+
+            QueryBuilder<Accomodations, ?> accQB = accDao.queryBuilder();
+            QueryBuilder<Countries, ?> countryQB = countryDao.queryBuilder();
+            QueryBuilder<ReviewsAccomodation, ?> reviewsAccQB = reviewsAccDao.queryBuilder();
+            QueryBuilder<AccCharacteristics, ?> accCharQB = accCharacteristicsDao.queryBuilder();
+            QueryBuilder<ReviewsCharacteristics, ?> reviewsCharQB = reviewsCharacteristicsDao.queryBuilder();
+
+            accQB.join(countryQB);
+            reviewsAccQB.join(accQB);
+            accCharQB.join(reviewsAccQB);
+            accCharQB.join(reviewsCharQB);
+*/
+            Dao<AllAccReviews, ?> all = DaoManager.createDao(connectionSource, AllAccReviews.class);
+            GenericRawResults<String[]> accomodationsReview = all.queryRaw("SELECT acc.id, rc.name, AVG(ac.mark) " +
+                    "FROM Accomodations acc " +
+                    "JOIN ReviewsAccomodation ra on acc.id = ra.accomodation_id" +
+                    "JOIN AccCharacteristics ac on ac.review_id = ra.id" +
+                    "JOIN ReviewsCharacteristics rc on rc.id = ac.characteristic_id" +
+                    "GROUP BY acc.id, rc.name");
+
+            StringBuffer sb = new StringBuffer();
+            for (String[] resultArray : accomodationsReview) {
+                sb.append("Accomodation " + resultArray[0] + " on characteristic "
+                        + resultArray[1] + " have average mark " + resultArray[2] + '\n');
+            }
+            accomodationsReview.close();
+
+            return sb.toString();
+        });
+    }
+
   private static Object newAccomodations(Request req, Response resp) throws IOException, SQLException {
     final JdbcConnectionSource connectionSource = createConnectionSource();
     Object success = runTxn("READ COMMITTED", connectionSource, () -> {
@@ -121,6 +165,7 @@ public class WebApp {
     get("/apartment/all", WebApp.withTry(WebApp::getAllAccomodations));
     get("/countries/all", WebApp.withTry(WebApp::getAllCountries));
     get("/apartment/new", WebApp.withTry(WebApp::newAccomodations));
+    get("/apartment/reviewsall", WebApp.withTry(WebApp::getAllReviewsAcc));
   }
 
   private static Route withTry(Route route) {

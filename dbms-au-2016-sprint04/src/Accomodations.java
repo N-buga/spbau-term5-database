@@ -18,10 +18,10 @@ import javax.persistence.Id;
 
 @Entity
 public class Accomodations {
-  @Column
+  @Column(name = "id")
   @GeneratedValue
   @Id
-  private Integer id;
+  private Integer idAcc;
 
   @Column
   private Integer user_id;
@@ -49,6 +49,8 @@ public class Accomodations {
 
   @DatabaseField(foreign=true, foreignAutoRefresh = true, columnName = "country_id")
   private Countries countries;
+
+
 
   // Required by ORM
   public Accomodations() {}
