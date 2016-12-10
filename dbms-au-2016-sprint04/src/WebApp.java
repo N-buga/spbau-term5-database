@@ -84,7 +84,7 @@ public class WebApp {
     });
   }
 
-    /*private static Object getAllReviewsAcc(Request req, Response resp) throws IOException, SQLException {
+  private static Object getAllReviewsAcc(Request req, Response resp) throws IOException, SQLException {
         final JdbcConnectionSource connectionSource = createConnectionSource();
         resp.type("text/plain");
         return runTxn("REPEATABLE READ", connectionSource, () -> {
@@ -108,7 +108,9 @@ public class WebApp {
             accCharQB.join(reviewsAccQB);
             accCharQB.join(reviewsCharQB);
 
-            Dao<AllAccReviews, ?> all = DaoManager.createDao(connectionSource, AllAccReviews.class);
+
+
+            /*Dao<AllAccReviews, ?> all = DaoManager.createDao(connectionSource, AllAccReviews.class);
             GenericRawResults<String[]> accomodationsReview = all.queryRaw("SELECT acc.id, rc.name, AVG(ac.mark) " +
                     "FROM Accomodations acc " +
                     "JOIN ReviewsAccomodation ra on acc.id = ra.accomodation_id" +
@@ -121,11 +123,12 @@ public class WebApp {
                 sb.append("Accomodation " + resultArray[0] + " on characteristic "
                         + resultArray[1] + " have average mark " + resultArray[2] + '\n');
             }
-            accomodationsReview.close();
+            accomodationsReview.close();*/
 
-            return sb.toString();
+            List<String> accReviews = accCharQB.query().stream().map(AccCharacteristics::toString).collect(Collectors.toList());
+            return String.join("\n", accReviews);
         });
-    }*/
+    }
 
 
   private static Object newAccomodations(Request req, Response resp) throws IOException, SQLException {
@@ -166,7 +169,7 @@ public class WebApp {
     get("/apartment/all", WebApp.withTry(WebApp::getAllAccomodations));
     get("/countries/all", WebApp.withTry(WebApp::getAllCountries));
     get("/apartment/new", WebApp.withTry(WebApp::newAccomodations));
-    //get("/apartment/reviewsall", WebApp.withTry(WebApp::getAllReviewsAcc));
+    get("/apartment/reviewsall", WebApp.withTry(WebApp::getAllReviewsAcc));
   }
 
   private static Route withTry(Route route) {
