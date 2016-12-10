@@ -1,8 +1,8 @@
 import javax.persistence.*;
 
 @Entity
-@Table(name="RC")
 public class ReviewsCharacteristics {
+
     @Column
     @GeneratedValue
     @Id
@@ -11,6 +11,7 @@ public class ReviewsCharacteristics {
     @Column
     private String name;
 
+    public ReviewsCharacteristics() {}
 
     public ReviewsCharacteristics(String name) {
         this.name = name;

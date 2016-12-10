@@ -7,7 +7,6 @@ import javax.persistence.*;
  */
 
 @Entity
-@Table(name="RA")
 public class ReviewsAccomodation {
     @Column
     @GeneratedValue
@@ -25,6 +24,8 @@ public class ReviewsAccomodation {
     
     @DatabaseField(foreign = true, foreignAutoRefresh = true, columnName = "accomodation_id")
     private Accomodations accomodation_id;
+
+    public ReviewsAccomodation() {}
 
     public ReviewsAccomodation(String review, Integer user_id, String reviewed_at, Accomodations accomodation_id) {
         this.review = review;

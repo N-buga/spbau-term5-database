@@ -7,7 +7,6 @@ import javax.persistence.*;
  */
 
 @Entity
-@Table(name="AC")
 public class AccCharacteristics {
     @Column
     @GeneratedValue

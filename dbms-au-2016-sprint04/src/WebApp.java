@@ -32,7 +32,7 @@ import static spark.Spark.port;
 public class WebApp {
   static JdbcConnectionSource createConnectionSource() {
     try {
-      JdbcConnectionSource connectionSource = new JdbcConnectionSource("jdbc:postgresql://localhost:5432/postgres?user=anta&password=7578757");
+      JdbcConnectionSource connectionSource = new JdbcConnectionSource("jdbc:postgresql://localhost:5432/accomodations?user=postgres&password=foobar");
       connectionSource.getReadWriteConnection(null).setAutoCommit(false);
       return connectionSource;
     } catch (SQLException e) {
@@ -88,45 +88,48 @@ public class WebApp {
         final JdbcConnectionSource connectionSource = createConnectionSource();
         resp.type("text/plain");
         return runTxn("REPEATABLE READ", connectionSource, () -> {
-            Dao<Accomodations, ?> accDao = DaoManager.createDao(connectionSource, Accomodations.class);
-            Dao<Countries, ?> countryDao = DaoManager.createDao(connectionSource, Countries.class);
-            Dao<ReviewsAccomodation, ?> reviewsAccDao = DaoManager
-                    .createDao(connectionSource, ReviewsAccomodation.class);
-            Dao<AccCharacteristics, ?> accCharacteristicsDao = DaoManager
-                    .createDao(connectionSource, AccCharacteristics.class);
-            Dao<ReviewsCharacteristics, ?> reviewsCharacteristicsDao = DaoManager
-                    .createDao(connectionSource, ReviewsCharacteristics.class);
+//            Dao<Accomodations, ?> accDao = DaoManager.createDao(connectionSource, Accomodations.class);
+//            Dao<Countries, ?> countryDao = DaoManager.createDao(connectionSource, Countries.class);
+//            Dao<ReviewsAccomodation, ?> reviewsAccDao = DaoManager
+//                    .createDao(connectionSource, ReviewsAccomodation.class);
+//            Dao<AccCharacteristics, ?> accCharacteristicsDao = DaoManager
+//                    .createDao(connectionSource, AccCharacteristics.class);
+//            Dao<ReviewsCharacteristics, ?> reviewsCharacteristicsDao = DaoManager
+//                    .createDao(connectionSource, ReviewsCharacteristics.class);
+//
+//            QueryBuilder<Accomodations, ?> accQB = accDao.queryBuilder();
+//            QueryBuilder<Countries, ?> countryQB = countryDao.queryBuilder();
+//            QueryBuilder<ReviewsAccomodation, ?> reviewsAccQB = reviewsAccDao.queryBuilder();
+//            QueryBuilder<AccCharacteristics, ?> accCharQB = accCharacteristicsDao.queryBuilder();
+//            QueryBuilder<ReviewsCharacteristics, ?> reviewsCharQB = reviewsCharacteristicsDao.queryBuilder();
+//
+//            accQB.join(countryQB);
+//            reviewsAccQB.join(accQB);
+//            accCharQB.join(reviewsAccQB);
+//            accCharQB.join(reviewsCharQB);
 
-            QueryBuilder<Accomodations, ?> accQB = accDao.queryBuilder();
-            QueryBuilder<Countries, ?> countryQB = countryDao.queryBuilder();
-            QueryBuilder<ReviewsAccomodation, ?> reviewsAccQB = reviewsAccDao.queryBuilder();
-            QueryBuilder<AccCharacteristics, ?> accCharQB = accCharacteristicsDao.queryBuilder();
-            QueryBuilder<ReviewsCharacteristics, ?> reviewsCharQB = reviewsCharacteristicsDao.queryBuilder();
-
-            accQB.join(countryQB);
-            reviewsAccQB.join(accQB);
-            accCharQB.join(reviewsAccQB);
-            accCharQB.join(reviewsCharQB);
 
 
-
-            /*Dao<AllAccReviews, ?> all = DaoManager.createDao(connectionSource, AllAccReviews.class);
+            Dao<AccCharacteristics, ?> all = DaoManager.createDao(connectionSource, AccCharacteristics.class);
             GenericRawResults<String[]> accomodationsReview = all.queryRaw("SELECT acc.id, rc.name, AVG(ac.mark) " +
                     "FROM Accomodations acc " +
-                    "JOIN ReviewsAccomodation ra on acc.id = ra.accomodation_id" +
-                    "JOIN AccCharacteristics ac on ac.review_id = ra.id" +
-                    "JOIN ReviewsCharacteristics rc on rc.id = ac.characteristic_id" +
-                    "GROUP BY acc.id, rc.name");
+                    "JOIN ReviewsAccomodation ra on acc.id = ra.accomodation_id " +
+                    "JOIN AccCharacteristics ac on ac.review_id = ra.id " +
+                    "JOIN ReviewsCharacteristics rc on rc.id = ac.characteristic_id " +
+                    "GROUP BY acc.id, rc.name " +
+                    "ORDER BY acc.id, rc.name ");
 
             StringBuffer sb = new StringBuffer();
             for (String[] resultArray : accomodationsReview) {
                 sb.append("Accomodation " + resultArray[0] + " on characteristic "
                         + resultArray[1] + " have average mark " + resultArray[2] + '\n');
             }
-            accomodationsReview.close();*/
+            accomodationsReview.close();
 
-            List<String> accReviews = accCharQB.query().stream().map(AccCharacteristics::toString).collect(Collectors.toList());
-            return String.join("\n", accReviews);
+            return sb.toString();
+
+//            List<String> accReviews = accCharQB.query().stream().map(AccCharacteristics::toString).collect(Collectors.toList());
+//            return String.join("\n", accReviews);
         });
     }
 
@@ -184,3 +187,37 @@ public class WebApp {
     };
   }
 }
+
+/*
+ id  | count
+-----+-------
+  13 |     3
+  60 |     4
+  70 |     5
+  87 |     5
+ 103 |     5
+ 106 |     5
+ 132 |     4
+ 140 |     4
+ 147 |     3
+ 161 |     5
+ 171 |     5
+ 184 |     4
+ 228 |     4
+ 238 |     5
+ 241 |     5
+ 245 |     5
+ 258 |     5
+ 278 |     5
+ 290 |     4
+ 316 |     5
+ 344 |     5
+ 357 |     5
+ 363 |     5
+ 399 |     5
+ 415 |     5
+ 436 |     4
+ 441 |     5
+ 493 |     4
+(28 rows)
+ */
