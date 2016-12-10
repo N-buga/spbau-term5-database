@@ -84,11 +84,11 @@ public class WebApp {
     });
   }
 
-    private static Object getAllReviewsAcc(Request req, Response resp) throws IOException, SQLException {
+    /*private static Object getAllReviewsAcc(Request req, Response resp) throws IOException, SQLException {
         final JdbcConnectionSource connectionSource = createConnectionSource();
         resp.type("text/plain");
         return runTxn("REPEATABLE READ", connectionSource, () -> {
-            /*Dao<Accomodations, ?> accDao = DaoManager.createDao(connectionSource, Accomodations.class);
+            Dao<Accomodations, ?> accDao = DaoManager.createDao(connectionSource, Accomodations.class);
             Dao<Countries, ?> countryDao = DaoManager.createDao(connectionSource, Countries.class);
             Dao<ReviewsAccomodation, ?> reviewsAccDao = DaoManager
                     .createDao(connectionSource, ReviewsAccomodation.class);
@@ -107,7 +107,7 @@ public class WebApp {
             reviewsAccQB.join(accQB);
             accCharQB.join(reviewsAccQB);
             accCharQB.join(reviewsCharQB);
-*/
+
             Dao<AllAccReviews, ?> all = DaoManager.createDao(connectionSource, AllAccReviews.class);
             GenericRawResults<String[]> accomodationsReview = all.queryRaw("SELECT acc.id, rc.name, AVG(ac.mark) " +
                     "FROM Accomodations acc " +
@@ -125,7 +125,8 @@ public class WebApp {
 
             return sb.toString();
         });
-    }
+    }*/
+
 
   private static Object newAccomodations(Request req, Response resp) throws IOException, SQLException {
     final JdbcConnectionSource connectionSource = createConnectionSource();
@@ -165,7 +166,7 @@ public class WebApp {
     get("/apartment/all", WebApp.withTry(WebApp::getAllAccomodations));
     get("/countries/all", WebApp.withTry(WebApp::getAllCountries));
     get("/apartment/new", WebApp.withTry(WebApp::newAccomodations));
-    get("/apartment/reviewsall", WebApp.withTry(WebApp::getAllReviewsAcc));
+    //get("/apartment/reviewsall", WebApp.withTry(WebApp::getAllReviewsAcc));
   }
 
   private static Route withTry(Route route) {
